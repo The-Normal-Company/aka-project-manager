@@ -645,26 +645,49 @@ function updateStakeholderDropdown() {
 }
 
 function addStakeholder() {
-    const newStakeholderName = document.getElementById('newStakeholder').value.trim();
-    if (newStakeholderName && !stakeholders.includes(newStakeholderName.toUpperCase())) {
-        stakeholders.push(newStakeholderName.toUpperCase());
-        stakeholderColors[newStakeholderName.toUpperCase()] = '#DDDEDD'; // Default color, you can add functionality to choose color
-        updateStakeholderDropdown();
-        addStakeholderToSchedule(newStakeholderName.toUpperCase());
-        document.getElementById('newStakeholder').value = ''; // Reset input field
+    const newStakeholderName = document.getElementById('newStakeholder').value.trim().toUpperCase(); // Ensure case consistency
+    if (newStakeholderName && !stakeholders.includes(newStakeholderName)) {
+        stakeholders.push(newStakeholderName);
+        stakeholderColors[newStakeholderName] = '#DDDEDD'; // Default color, add functionality to choose color if needed
+        const scheduleBody = document.getElementById('scheduleBody');
+        const row = document.createElement('tr');
+        const th = document.createElement('th');
+        th.className = 'first-col stakeholder-color';
+        th.style.backgroundColor = stakeholderColors[newStakeholderName]; // Set background color
+        const textSpan = document.createElement('span');
+        textSpan.className = 'stakeholder-text';
+        textSpan.textContent = newStakeholderName;
+        const coverDiv = document.createElement('div');
+        coverDiv.className = 'stakeholder-white-cover';
+        th.appendChild(textSpan);
+        th.appendChild(coverDiv);
+        row.appendChild(th);
+        month.forEach(() => {
+            const td = document.createElement('td');
+            td.classList.add('schedule-cell');
+            row.appendChild(td);
+        });
+        scheduleBody.appendChild(row);
+        document.getElementById('newStakeholder').value = ''; // Clear the input after adding
     }
 }
 
+
 function removeStakeholder() {
-    const stakeholderName = document.getElementById('newStakeholder').value.trim();
-    const index = stakeholders.indexOf(stakeholderName.toUpperCase());
+    const stakeholderName = document.getElementById('newStakeholder').value.trim().toUpperCase();
+    const index = stakeholders.indexOf(stakeholderName);
     if (index > -1) {
         stakeholders.splice(index, 1);
-        updateStakeholderDropdown();
-        removeStakeholderFromSchedule(stakeholderName.toUpperCase());
-        document.getElementById('newStakeholder').value = ''; // Reset input field
+        const scheduleBody = document.getElementById('scheduleBody');
+        Array.from(scheduleBody.children).forEach(row => {
+            if (row.firstChild.textContent.trim().toUpperCase() === stakeholderName) {
+                scheduleBody.removeChild(row);
+            }
+        });
+        document.getElementById('newStakeholder').value = ''; // Clear the input after removing
     }
 }
+
 
 function addStakeholderToSchedule(stakeholder) {
     const scheduleBody = document.getElementById('scheduleBody');
@@ -747,3 +770,4 @@ document.addEventListener('DOMContentLoaded', function() {
   
 </body>
 </html>
+
