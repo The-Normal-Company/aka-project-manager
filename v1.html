@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVH Preliminary Pull-Plan Schedule</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background-color: #fff; /* Ensure the body background is white */
+        width: 70%;
+    }
+    .stakeholder-color {
+    position: relative; /* Necessary for absolute positioning of children */
+    background-color: #000; /* Will be overridden by JavaScript */
+    padding: 5px 10px; /* Add some padding inside the cell */
+    height: 100%; /* Ensures the cell uses the full available height */
+}
+
+.stakeholder-text {
+    position: relative; /* Keeps text at its normal position, at the top */
+    z-index: 2; /* Ensures it stays above the background div */
+    display: block; /* Makes span behave like a block element */
+    margin-top: 0; /* Ensure there's no margin pushing it down */
+    padding-top: 0; /* No padding at the top to push it down */
+    line-height: normal; /* Adjust line height if needed */
+}
+
+.stakeholder-white-cover {
+    background-color: #fff; /* White background for the div */
+    width: 100%; /* Ensures the div covers the full width of the cell */
+    position: absolute; /* Absolute position to place it correctly */
+    left: 0;
+    top: 45px; /* Position it below the text, adjust this value based on your text height */
+    bottom: 0; /* Extends to the bottom of the cell */
+    z-index: 1; /* Below the text but above any other background */
+}
+
+
+
+
+    tr {
+        border-top: 7px solid transparent; /* Set a transparent top border by default */
+    }
+
+    header {
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #fff; /* Header background is white */
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border: none; /* Remove all outer borders */
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px dashed #ccc; /* Interior borders are dashed */
+        border-left: 1.5px dashed #000000;
+        vertical-align: top; /* Align the text to the top of the cell */
+        background-color: #fff; /* Background color for all cells is white */
+    }
+
+
+    th {
+        border-top: none; /* Remove top border for header cells */
+    }
+    td {
+        height: 50px
+    }
+
+    td:first-child, th:first-child {
+        border-left: none; /* Ensure no left border on the first column */
+        font-size: .8em; /* Larger font size for the first column */
+        border-bottom: none;
+    }
+
+    th:last-child, td:last-child {
+        border-right: none; /* Ensure no right border on the last column */
+    }
+
+    tr:last-child td {
+        border-bottom: none; /* Remove bottom border on the last row */
+    }
+
+    .first-col {
+        width: 110px; /* Sufficient width to display most names without wrapping */
+        overflow: hidden; /* Hide overflow */
+        white-space: normal; /* Allow text wrapping */
+        word-wrap: break-word; /* Break words to ensure fitting */
+    }
+
+
+    .schedule-cell:hover {
+        background-color: #f2f2f2; /* Slight grey background on hover for better UX */
+    }
+
+    .deliverable, .meeting, .internalCoordination {
+        background-color: #4CAF50; /* Specific colors for event types */
+        color: #fff; /* White text for better readability */
+    }
+    .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#scheduleTitle {
+    font-weight: bold; /* Make the font bold */
+    font-style: italic; /* Make the font italicized */
+    font-size: 20px; /* Set a specific font size if needed */
+    flex: 1;
+}
+/* Existing styles... */
+
+/* General icon styles */
+.icon {
+    display: inline-block;
+    vertical-align: middle; /* Center icon vertically with the text */
+    margin-right: 5px; /* Spacing between the icon and label */
+}
+
+/* Specific icon adjustments */
+.chevron-icon {
+    font-size: 23px; /* Example size, adjust as needed */
+}
+
+.circle-icon {
+    font-size: 40px; /* Smaller size to match the others, adjust as needed */
+    vertical-align: text-bottom;  /* Aligns icon vertically with adjacent text */
+    line-height: 1;  /* Ensures that the line height doesn't affect alignment */
+
+}
+
+.diamond-icon {
+    font-size: 26px; /* Example size, adjust as needed */
+}
+
+.label {
+    margin: 0 10px; /* Adjust spacing as needed */
+    font-weight: bold;
+    font-style: italic;
+    font-family: Arial, sans-serif;
+}
+
+/* New styles for the header container */
+.header-container {
+    display: flex;
+    align-items: center; /* Align the title and icons vertically */
+    justify-content: space-between; /* Separate the title and icons */
+    padding: 0 10px; /* Add padding on the sides */
+}
+
+/* Ensure that the icons are vertically centered with the text */
+.icon-labels {
+    display: flex;
+    align-items: center; /* Center the items vertically */
+}
+
+/* Fixing spacing to ensure alignment */
+.icon-labels .icon, .icon-labels .label {
+    display: inline-block;
+    vertical-align: middle; /* Align the icons and text vertically */
+    margin-right: 15px; /* Space between the icons and the labels */
+}
+
+/* Removing the last margin-right for the last label */
+.icon-labels .label:last-child {
+    margin-right: 0;
+}
+
+/* Other styles... */
+.schedule-cell {
+        position: relative; /* Essential for positioning icons absolutely within the cell */
+        height: 80px; /* Fixed height to ensure there's enough space */
+        width: 100%; /* Full width */
+    }
+    .icon-2 {
+        cursor: grab; /* Visual cue for draggable items */
+        position: absolute; /* Essential for precise positioning */
+        user-select: none; /* Prevents text selection */
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; /* Simulates a black border */
+
+    }
+
+    .icon-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    white-space: normal; /* Allow wrapping of text */
+    width: auto; /* Allow the wrapper to grow with content */
+}
+
+.icon-text {
+    max-width: 100px; /* Adjusted for about 20 characters depending on font size */
+    word-wrap: break-word; /* Ensure words break to respect max-width */
+    white-space: normal; /* Override previous no-wrap if set */
+    margin-left: 25px; /* Space between the icon and the text */
+    line-height: 1.2; /* Adjust line height for better readability when wrapped */
+    font-size: 16px; /* Specify a default font size */
+}
+
+html, body {
+    height: 100vh; /* 100% of the viewport height */
+    width: 60vw; /* 100% of the viewport width */
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* This will disable scrolling */
+}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+    <div id="container2">
+    
+        <div id="exportContainer" style="width: 100%; overflow: hidden;">
+
+            <main>
+                <div class="header-container">
+                    <div id="scheduleTitle">
+                        SVH Preliminary Pull-Plan Schedule
+                    </div>
+                    <div class="icon-labels">
+                        <span class="icon chevron-icon">&#10148;</span><span class="label">|  KICKOFF / INTERNAL COORDINATION  |</span>
+                        <span class="icon circle-icon">&#9679;</span><span class="label">|  DELIVERABLE  |</span>
+                        <span class="icon diamond-icon">&#9670;</span><span class="label">|  MEETING  |</span>
+                    </div>
+                </div>
+                <table id="schedule">
+                    <thead>
+                        <tr id="scheduleHeader">
+                            <th class="first-col"></th> <!-- Blank header cell for alignment -->
+                            <!-- Dynamic months will be inserted here by JavaScript -->
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody">
+                        <!-- Stakeholders and events will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </main>
+        </div>
+      <div>&nbsp;</div>
+
+
+      <header>
+    
+        
+        <form id="monthForm">
+            <label for="selectedMonth">Select Starting Month:</label>
+            <select id="selectedMonth" name="selectedMonth">
+              <option value="blank" selected disabled>Select Month</option>
+              <option value="Jan">January</option>
+              <option value="Feb">February</option>
+              <option value="Mar">March</option>
+              <option value="Apr">April</option>
+              <option value="May">May</option>
+              <option value="Jun">June</option>
+              <option value="Jul">July</option>
+              <option value="Aug">August</option>
+              <option value="Sep">September</option>
+              <option value="Oct">October</option>
+              <option value="Nov">November</option>
+              <option value="Dec">December</option>
+            </select>
+            <label for="numMonths">Number of Months:</label>
+            <input type="number" id="numMonths" name="numMonths" min="1" max="12" required>
+            <button type="button" onclick="updateScheduleHeaders()">Update Schedule</button>
+          </form>
+          
+          
+
+        <form id="stakeholderForm">
+          <label for="newStakeholder">Add/Remove Stakeholder:</label>
+          <input type="text" id="newStakeholder" name="newStakeholder" required>
+      
+          <button type="button" onclick="addStakeholder()">Add Stakeholder</button>
+          <button type="button" onclick="removeStakeholder()">Remove Stakeholder</button>
+        </form>
+        <div>Toggle the event you want to add, drag them around, double-click to edt, and right click to delete.</div>
+
+        <div class="icon-labels">
+            <button class="icon chevron-icon" onclick="toggleAddIcon('chevron-icon')">&#10148;</button>
+            <button class="icon circle-icon" onclick="toggleAddIcon('circle-icon')">&#9679;</button>
+            <button class="icon diamond-icon" onclick="toggleAddIcon('diamond-icon')">&#9670;</button>
+        </div>
+        <div>&nbsp;</div>
+<button onclick="exportAsPNG()">Export as PNG</button>
+<button onclick="exportAsPDF()">Export as PDF</button>
+
+      </header>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+
+<script>
+    function isInsideSchedule(x, y) {
+    const scheduleRect = document.getElementById('schedule').getBoundingClientRect();
+    return x >= scheduleRect.left && x <= scheduleRect.right && y >= scheduleRect.top && y <= scheduleRect.bottom;
+}
+
+    // Backup of the original months array
+const originalMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+let month = [...originalMonths];  // Use a copy for operations
+
+function updateScheduleHeaders() {
+    const selectedMonthIndex = document.getElementById('selectedMonth').selectedIndex - 1; // Adjust for 0-based index, assuming the first option is 'Select Month' and disabled
+    const numMonths = parseInt(document.getElementById('numMonths').value);
+
+    // Restore months from the original in case it was altered
+    month = [...originalMonths];
+
+    // Update headers based on the selected month index
+    const scheduleHeader = document.getElementById('scheduleHeader');
+    const headers = scheduleHeader.querySelectorAll('th:not(.first-col)');
+    headers.forEach((header, index) => {
+        if (index < numMonths) {
+            const monthIndex = (selectedMonthIndex + index) % 12;
+            header.textContent = months[monthIndex];
+        } else {
+            header.remove();  // Remove extra header elements
+        }
+    });
+
+    // Adjust columns for each row in the body
+    const existingRows = document.querySelectorAll('#scheduleBody tr');
+    existingRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const currentCellCount = cells.length;
+        if (currentCellCount > numMonths) {
+            for (let i = currentCellCount; i > numMonths; i--) {
+                cells[i - 1].remove();
+            }
+        } else if (currentCellCount < numMonths) {
+            for (let i = currentCellCount; i < numMonths; i++) {
+                const td = document.createElement('td');
+                td.classList.add('schedule-cell');
+                row.appendChild(td);
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    let activeIcon = null;
+    const iconMap = {
+        'chevron-icon': '&#10148;',
+        'circle-icon': '&#9679;',
+        'diamond-icon': '&#9670;'
+    };
+
+    function toggleAddIcon(iconType) {
+        activeIcon = activeIcon === iconType ? null : iconType;
+    }
+
+    document.querySelectorAll('.icon').forEach(button => {
+        button.addEventListener('click', function() {
+            toggleAddIcon(button.classList[1]);
+        });
+    });
+
+    const container = document.getElementById('container2');
+    container.addEventListener('mousedown', function(e) {
+    if (e.button === 0 && activeIcon) { // Left-click to add icon
+        // Check if the click is inside the schedule
+        if (isInsideSchedule(e.clientX, e.clientY)) {
+            const iconWrapper = document.createElement('div');
+            iconWrapper.className = 'icon-wrapper';
+            iconWrapper.style.position = 'absolute';
+
+            const icon = document.createElement('span');
+            icon.innerHTML = iconMap[activeIcon];
+            icon.className = 'icon-2 ' + activeIcon;
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'icon-text';
+            textSpan.textContent = 'Enter text'; // Default text
+
+            iconWrapper.appendChild(icon);
+            iconWrapper.appendChild(textSpan);
+            container.appendChild(iconWrapper);
+
+            adjustPosition(iconWrapper, e);
+            initDrag(iconWrapper);
+        }
+    }
+});
+
+
+    // Double-click to edit text
+    container.addEventListener('dblclick', function(e) {
+        if (e.target.classList.contains('icon-text')) {
+            e.target.contentEditable = true;
+            e.target.focus();
+            document.execCommand('selectAll', false, null); // Auto-highlight the text
+        }
+    });
+
+    // Right-click to delete wrapper
+    container.addEventListener('contextmenu', function(e) {
+        if (e.target.classList.contains('icon-2') || e.target.classList.contains('icon-text')) {
+            e.preventDefault();
+            e.target.closest('.icon-wrapper').remove(); // Remove the entire wrapper
+        }
+    });
+
+    // Disable editing on blur
+    container.addEventListener('blur', function(e) {
+        if (e.target.classList.contains('icon-text')) {
+            e.target.contentEditable = false;
+        }
+    }, true);
+
+    function getColorFromRow(yPosition) {
+        const rows = document.querySelectorAll('#scheduleBody tr');
+        for (let row of rows) {
+            let rect = row.getBoundingClientRect();
+            if (yPosition >= rect.top && yPosition <= rect.bottom) {
+                return window.getComputedStyle(row.firstChild).backgroundColor;
+            }
+        }
+        return null; // Default color if no row is matched
+    }
+
+    function updateIconColor(iconWrapper, yPosition) {
+    let color = getColorFromRow(yPosition);
+    let icons = iconWrapper.querySelectorAll('.icon-2');
+    icons.forEach(icon => {
+        icon.style.color = color;
+    });
+}
+
+
+    // Double-click to edit text
+    container.addEventListener('dblclick', function(e) {
+        if (e.target.classList.contains('icon-text')) {
+            e.target.contentEditable = true;
+            e.target.focus();
+            document.execCommand('selectAll', false, null); // Auto-highlight the text
+        }
+    });
+
+    // Right-click to delete wrapper
+    container.addEventListener('contextmenu', function(e) {
+        if (e.target.classList.contains('icon-2') || e.target.classList.contains('icon-text')) {
+            e.preventDefault();
+            e.target.closest('.icon-wrapper').remove(); // Remove the entire wrapper
+        }
+    });
+
+    // Disable editing on blur
+    container.addEventListener('blur', function(e) {
+        if (e.target.classList.contains('icon-text')) {
+            e.target.contentEditable = false;
+        }
+    }, true);
+
+    function getColorFromRow(yPosition) {
+        const rows = document.querySelectorAll('#scheduleBody tr');
+        for (let row of rows) {
+            let rect = row.getBoundingClientRect();
+            if (yPosition >= rect.top && yPosition <= rect.bottom) {
+                return window.getComputedStyle(row.firstChild).backgroundColor;
+            }
+        }
+        return null; // Default color if no row is matched
+    }
+
+    function updateIconColor(iconWrapper, yPosition) {
+    let color = getColorFromRow(yPosition);
+    let icons = iconWrapper.querySelectorAll('.icon-2');
+    icons.forEach(icon => {
+        icon.style.color = color;
+    });
+}
+function adjustPosition(iconWrapper, e) {
+    const containerRect = container.getBoundingClientRect();
+
+    // pageX and pageY include the scroll offsets of the window, so no need to subtract them again
+    const xPosition = e.pageX - containerRect.left;
+    const yPosition = e.pageY - containerRect.top;
+
+    iconWrapper.style.left = xPosition + 'px';
+    iconWrapper.style.top = yPosition + 'px';
+
+    updateIconColor(iconWrapper, yPosition);
+}
+
+
+function initDrag(iconWrapper) {
+    let moving = false;
+    let startX = 0, startY = 0;
+
+    iconWrapper.addEventListener('mousedown', function(e) {
+        if (e.button === 0) { // Left-click only for dragging
+            e.stopPropagation();  // Prevent event from bubbling up
+
+            moving = true;
+            startX = e.clientX - iconWrapper.offsetLeft; // Correct initial offset
+            startY = e.clientY - iconWrapper.offsetTop;  // Correct initial offset
+            e.preventDefault(); // Prevent default actions like text selection
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+    });
+
+    function handleMouseMove(e) {
+        if (moving) {
+            // Calculate new position directly in pixels
+
+            let newX = e.clientX - startX;
+            let newY = e.clientY - startY;
+
+            // Apply the new positions directly to the style
+            iconWrapper.style.left = newX + 'px';
+            iconWrapper.style.top = newY + 'px';
+
+            // Optionally update color or other properties based on position
+            updateIconColor(iconWrapper, newY);
+        }
+    }
+
+    function handleMouseUp() {
+        moving = false;
+        // Clean up event listeners to avoid performance issues
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    }
+}
+function updateIconColor(iconWrapper, absoluteYPosition) {
+    let color = getColorFromRow(absoluteYPosition);
+    let icons = iconWrapper.querySelectorAll('.icon-2');
+    icons.forEach(icon => {
+        icon.style.color = color;
+    });
+}
+
+function getColorFromRow(yPosition) {
+    const rows = document.querySelectorAll('#scheduleBody tr');
+    for (let row of rows) {
+        let rect = row.getBoundingClientRect();
+        if (yPosition >= rect.top && yPosition <= rect.bottom) {
+            return window.getComputedStyle(row.firstChild).backgroundColor;
+        }
+    }
+    return null; // Default color if no row is matched
+}
+
+// Adjust positions on window resize
+window.addEventListener('resize', function() {
+    document.querySelectorAll('.icon-wrapper').forEach(wrapper => {
+        adjustPositionOnResize(wrapper);
+    });
+});
+
+function adjustPositionOnResize(iconWrapper) {
+    const containerRect = container.getBoundingClientRect();
+    const xPercentage = parseFloat(iconWrapper.style.left.replace('%', ''));
+    const yPercentage = parseFloat(iconWrapper.style.top.replace('%', ''));
+    iconWrapper.style.left = `${xPercentage}%`;
+    iconWrapper.style.top = `${yPercentage}%`;
+    const newY = containerRect.top + containerRect.height * yPercentage / 100;
+    updateIconColor(iconWrapper, newY);
+}
+
+});
+
+function exportAsPNG() {
+    var node = document.getElementById('exportContainer'); // Make sure this is the ID of your outer container
+    domtoimage.toPng(node)
+        .then(function(dataUrl) {
+            var link = document.createElement('a');
+            link.download = 'complete_schedule.png';
+            link.href = dataUrl;
+            link.click();
+        })
+        .catch(function(error) {
+            console.error('Error exporting to PNG:', error);
+        });
+}
+
+function exportAsPDF() {
+    var node = document.getElementById('exportContainer');
+
+domtoimage.toPng(node)
+    .then(function (dataUrl) {
+        // Initialize jsPDF with new reference
+        const { jsPDF } = window.jspdf;
+        var pdf = new jsPDF({
+            orientation: 'landscape', // Can be 'portrait'
+            unit: 'px',
+            format: [node.offsetWidth, node.offsetHeight]
+        });
+
+        // Add image to PDF
+        pdf.addImage(dataUrl, 'PNG', 0, 0, node.offsetWidth, node.offsetHeight);
+
+        // Save the PDF
+        pdf.save('Schedule.pdf');
+    })
+    .catch(function (error) {
+        console.error('Failed to load image', error);
+    });
+}
+
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const stakeholders = ['MILESTONES', 'OWNER', 'CONSTRUCTION MANAGER', 'ARCHITECURE/ INTERIORS', 'MEDICAL EQUIPMENT', "MEP", "STRUCTURAL", "CIVIL"];
+const stakeholderColors = {
+    'MILESTONES': '#8364AB',
+    'OWNER': '#27AAE1',
+    'CONSTRUCTION MANAGER': '#1BA99D',
+    'ARCHITECURE/ INTERIORS': '#58BA4C',
+    'MEDICAL EQUIPMENT': '#F8A94C',
+    'MEP': '#A4A4A4',
+    'STRUCTURAL': '#C5C5C5',
+    'CIVIL': '#DDDEDD',
+};
+
+function updateStakeholderDropdown() {
+    const select = document.getElementById('stakeholderSelect');
+    select.innerHTML = '';
+    stakeholders.forEach(stakeholder => {
+        const option = document.createElement('option');
+        option.value = stakeholder;
+        option.textContent = stakeholder;
+        select.appendChild(option);
+    });
+}
+
+function addStakeholder() {
+    const newStakeholderName = document.getElementById('newStakeholder').value.trim();
+    if (newStakeholderName && !stakeholders.includes(newStakeholderName.toUpperCase())) {
+        stakeholders.push(newStakeholderName.toUpperCase());
+        stakeholderColors[newStakeholderName.toUpperCase()] = '#DDDEDD'; // Default color, you can add functionality to choose color
+        updateStakeholderDropdown();
+        addStakeholderToSchedule(newStakeholderName.toUpperCase());
+        document.getElementById('newStakeholder').value = ''; // Reset input field
+    }
+}
+
+function removeStakeholder() {
+    const stakeholderName = document.getElementById('newStakeholder').value.trim();
+    const index = stakeholders.indexOf(stakeholderName.toUpperCase());
+    if (index > -1) {
+        stakeholders.splice(index, 1);
+        updateStakeholderDropdown();
+        removeStakeholderFromSchedule(stakeholderName.toUpperCase());
+        document.getElementById('newStakeholder').value = ''; // Reset input field
+    }
+}
+
+function addStakeholderToSchedule(stakeholder) {
+    const scheduleBody = document.getElementById('scheduleBody');
+    const row = document.createElement('tr');
+    const th = document.createElement('th');
+    th.className = 'first-col stakeholder-color';
+    th.style.backgroundColor = stakeholderColors[stakeholder];
+    row.style.borderColor = stakeholderColors[stakeholder];
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'stakeholder-text';
+    textSpan.textContent = stakeholder;
+    const innerDiv = document.createElement('div');
+    innerDiv.className = 'stakeholder-white-cover';
+    th.appendChild(textSpan);
+    th.appendChild(innerDiv);
+    row.appendChild(th);
+
+    months.forEach(() => {
+        const td = document.createElement('td');
+        td.classList.add('schedule-cell');
+        row.appendChild(td);
+    });
+    scheduleBody.appendChild(row);
+}
+
+function removeStakeholderFromSchedule(stakeholder) {
+    const scheduleBody = document.getElementById('scheduleBody');
+    Array.from(scheduleBody.children).forEach(row => {
+        if (row.firstChild.textContent === stakeholder) {
+            scheduleBody.removeChild(row);
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', function() {
+
+    const scheduleHeader = document.getElementById('scheduleHeader');
+    const scheduleBody = document.getElementById('scheduleBody');
+
+    months.forEach(month => {
+        const th = document.createElement('th');
+        th.textContent = month;
+        scheduleHeader.appendChild(th);
+    });
+
+    stakeholders.forEach(stakeholder => {
+        const row = document.createElement('tr');
+        const th = document.createElement('th');
+        th.className = 'first-col stakeholder-color'; // Apply fixed width, text truncation, and color styles
+        th.style.backgroundColor = stakeholderColors[stakeholder]; // Set the background color from the dictionary
+        row.style.borderColor = stakeholderColors[stakeholder]; // Set the border color for the entire row
+
+        // Create a span for the text
+        const textSpan = document.createElement('span');
+        textSpan.className = 'stakeholder-text';
+        textSpan.textContent = stakeholder;
+
+        // Create a white div that will go under the text and cover the cell width
+        const innerDiv = document.createElement('div');
+        innerDiv.className = 'stakeholder-white-cover';
+
+        // Append the text span and div to the th element
+        th.appendChild(textSpan);
+        th.appendChild(innerDiv);
+        
+        row.appendChild(th);
+
+        months.forEach(() => {
+            const td = document.createElement('td');
+            td.classList.add('schedule-cell');
+            row.appendChild(td);
+        });
+        scheduleBody.appendChild(row);
+    });
+});
+
+
+
+</script>
+  
+</body>
+</html>
